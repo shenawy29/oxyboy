@@ -1,0 +1,18 @@
+[package]
+name = "oxyboy"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "oxyboy"
+path = "src/main.rs"
+
+[lib]
+name = "oxyboy"
+path = "src/lib/lib.rs"
+
+[dependencies]
+bitflags = "2.6.0"
+bitmatch = "0.1.1"
+eframe = { version = "0.28.1", features = ["wgpu"] }
+rfd = "0.14.1"
