@@ -26,12 +26,13 @@ impl Mbc {
         }
     }
 
+    #[inline(always)]
     pub(crate) fn read(&self, a: u16) -> u8 {
         match a {
             0..0x4000 => self.rom[a as usize],
             0x4000..0x8000 => {
-                let rom_addr = (a % 0x4000) + (self.rom_bank * 0x4000);
-                self.rom[rom_addr as usize]
+                let rom_addr = (a as usize % 0x4000) + (self.rom_bank as usize * 0x4000);
+                self.rom[rom_addr]
             }
             0xA000..0xC000 => {
                 if !self.ram_enabled {
@@ -42,10 +43,11 @@ impl Mbc {
                 let addr = addr + (self.ram_bank as u16 * 0x2000);
                 self.ram[addr as usize]
             }
-            _ => 0xFF,
+            _ => 0,
         }
     }
 
+    #[inline(always)]
     pub(crate) fn write(&mut self, a: u16, v: u8) {
         match a {
             0x0..0x2000 => self.ram_enabled = (v & 0x0F) == 0x0A,
