@@ -40,9 +40,9 @@ impl Mmu {
     #[inline(always)]
     pub(crate) fn rb(&self, a: u16) -> u8 {
         match a {
-            0x0000..0x8000 => self.cart.read(a),
+            0x0000..0x8000 => self.cart.mbc.read(a),
             0x8000..0xA000 => self.ppu.rb(a),
-            0xA000..0xC000 => self.cart.read(a),
+            0xA000..0xC000 => self.cart.mbc.read(a),
             0xC000..0xE000 => self.cart.wram_read(a),
             0xE000..0xFE00 => 0,
             0xFE00..0xFEA0 => self.ppu.rb(a),
@@ -64,9 +64,9 @@ impl Mmu {
     #[inline(always)]
     pub(crate) fn wb(&mut self, a: u16, v: u8) {
         match a {
-            0x0000..0x8000 => self.cart.write(a, v),
+            0x0000..0x8000 => self.cart.mbc.write(a, v),
             0x8000..0xA000 => self.ppu.wb(a, v),
-            0xA000..0xC000 => self.cart.write(a, v),
+            0xA000..0xC000 => self.cart.mbc.write(a, v),
             0xC000..0xE000 => self.cart.wram_write(a, v),
             0xE000..0xFE00 => {}
             0xFE00..0xFEA0 => self.ppu.wb(a, v),

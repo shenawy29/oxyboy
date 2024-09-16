@@ -78,7 +78,8 @@ impl Emulator {
         let (filename_tx, filename_rx) = mpsc::channel::<PathBuf>();
 
         let native_options = eframe::NativeOptions {
-            viewport: ViewportBuilder::default().with_inner_size(Vec2::new(160.0, 144.0)),
+            viewport: ViewportBuilder::default()
+                .with_inner_size(Vec2::new(160.0 * 4.0, 144.0 * 4.0)),
             ..Default::default()
         };
 

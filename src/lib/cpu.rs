@@ -516,7 +516,7 @@ impl Cpu {
         self.reg.flag(C, false);
         self.reg.flag(H, false);
         self.reg.flag(N, false);
-        (a >> 4) | (a << 4)
+        a.rotate_left(4)
     }
 
     fn alu_sra(&mut self, a: u8) -> u8 {

@@ -1,5 +1,6 @@
 debug/
 target/
 Cargo.lock
+flake.lock
 **/*.rs.bk
 *.pdb
