@@ -4,10 +4,7 @@ Oxyboy is a partially-implemented Gameboy emulator written in Rust, using WebGPU
 
 To find games, go to [emulatorgames.net](https://emulatorgames.net). [Here](https://www.emulatorgames.net/roms/gameboy-color/tetris/) is link for Tetris.
 
-<p align="center">
-  <img title="Oxyboy running on Linux natively." alt="Oxyboy running on Linux natively." src="https://github.com/user-attachments/assets/78d53ed7-e630-494b-b766-2ba345269d61" width="45%">
-  <img title="Oxyboy running on Linux using Wine." alt="Oxyboy.exe running on Linux using Wine." src="https://github.com/user-attachments/assets/6c02417b-8fb6-4bf8-9e67-18f8d0280f2e" width="45%">
-</p>
+![image](https://github.com/user-attachments/assets/7d160421-52b3-48a7-b956-3585b6a280af)
 
 ## Features
 
@@ -56,7 +53,6 @@ cargo run --release
 
 ## Roadmap
 
-- MBC1 emulation
 - Sound emulation
 - Save games
 - WASM release
