@@ -110,22 +110,39 @@ impl Cpu {
 
         #[bitmatch]
         match opcode {
-            "00000000" => 1, // 0x0
-            "00001000" => { let v = self.fetchw(); self.writew(v, self.reg.sp);  3 }
+            // NOP
+            "00000000" => 1,
+
+            // LD (u16), SP
+            "00001000" => { let v = self.fetchw(); self.writew(v, self.reg.sp);  5 }
+            
+            // STOP
             "00010000" => 1,
+
+            // JR (unconditional)
             "00011000" => { self.jr(); 3 }
+
+            // JR (conditional)
             "001cc000" => {
                 if decode_condition(c).check(self) { self.jr(); 3 }
                 else { self.reg.pc = self.reg.pc.wrapping_add(1); 2 }
             }
+
+            // LD r16, u16
             "00rr0001" => { let r = self.reg.decode_r16_g1(r); let v = self.fetchw(); self.setreg(&r, v); 3 }
+
+            // ADD HL, r16
             "00rr1001" => {
                 let r = self.reg.decode_r16_g1(r);
                 let v = self.readreg(&r);
                 self.alu_add16(v);
                 2
             }
+
+            // LD (r16), A
             "00rr0010" => { let r = self.reg.decode_r16_g2(r); let a = self.readreg(&r); let v = self.reg.a; self.writeb(a, v); 2 }
+
+            // LD A,(r16)
             "00rr1010" => {
                 let r = self.reg.decode_r16_g2(r);
                 let a = self.readreg(&r);
@@ -133,8 +150,14 @@ impl Cpu {
                 self.reg.a = v;
                 2
             }
+
+            // INC r16
             "00rr0011" => { let r = self.reg.decode_r16_g1(r); let v = self.readreg(&r); self.setreg(&r, v.wrapping_add(1)); 2 }
+
+            // DEC r16
             "00rr1011" => { let r = self.reg.decode_r16_g1(r); let v = self.readreg(&r); self.setreg(&r, v.wrapping_sub(1)); 2 }
+
+            // INC r8
             "00rrr100" => {
                 let r = self.reg.decode_r8(r);
                 let a = self.readreg(&r);
@@ -154,6 +177,7 @@ impl Cpu {
                 }
             }
 
+            // DEC r8
             "00rrr101" => {
                 let r = self.reg.decode_r8(r);
                 let a = self.readreg(&r);
@@ -172,6 +196,7 @@ impl Cpu {
                     }
                 }
             }
+            // LD r8, u8
             "00rrr110" => {
                 let r = self.reg.decode_r8(r);
                 match r {
@@ -179,18 +204,21 @@ impl Cpu {
                     _ => { let v = self.fetchb(); self.setreg(&r, v as u16); 2 }
                 }
             }
+            // 
             "00iii111" => match i {
-                0 => { self.reg.a = self.alu_rlc(self.reg.a); self.reg.flag(Z, false); 1},
-                1 => { self.reg.a = self.alu_rrc(self.reg.a); self.reg.flag(Z, false); 1}
+                0 => { self.reg.a = self.alu_rlc(self.reg.a); self.reg.flag(Z, false); 1 },
+                1 => { self.reg.a = self.alu_rrc(self.reg.a); self.reg.flag(Z, false); 1 }
                 2 => { self.reg.a = self.alu_rl(self.reg.a); self.reg.flag(Z, false); 1 }
-                3 => { self.reg.a = self.alu_rr(self.reg.a); self.reg.flag(Z, false); 1}
+                3 => { self.reg.a = self.alu_rr(self.reg.a); self.reg.flag(Z, false); 1 }
                 4 => { self.alu_daa(); 1},
-                5 => { self.reg.a = !self.reg.a; self.reg.flag(H, true); self.reg.flag(N, true); 1}
-                6 => { self.reg.flag(C, true); self.reg.flag(H, false); self.reg.flag(N, false); 1}
-                7 => { let c = !self.reg.getflag(C); self.reg.flag(C, c); self.reg.flag(H, false); self.reg.flag(N, false); 1}
+                5 => { self.reg.a = !self.reg.a; self.reg.flag(H, true); self.reg.flag(N, true); 1 }
+                6 => { self.reg.flag(C, true); self.reg.flag(H, false); self.reg.flag(N, false); 1 }
+                7 => { let c = !self.reg.getflag(C); self.reg.flag(C, c); self.reg.flag(H, false); self.reg.flag(N, false); 1 }
                 _ => unreachable!(),
             },
+            // HALT
             "01110110" => { self.halted = true; 1 }
+            // LD r8, r8
             "01dddsss" => {
                 let s = &self.reg.decode_r8(s);
                 let d = &self.reg.decode_r8(d);
@@ -199,37 +227,41 @@ impl Cpu {
                     let a = self.reg.hl();
                     let v = self.readreg(s) as u8;
                     self.writeb(a, v);
-                    3
+                    2
                 } else if s == &Register::Hlm {
                     let a = self.reg.hl();
                     let v = self.mmu.rb(a);
                     self.setreg(d, v as u16);
-                    3
+                    2
                 } else {
                     let v = self.readreg(s);
                     self.setreg(d, v);
-                    2
+                    1
                 }
             }
 
+            // ALU A, r8
             "10iiirrr" => {
                 let r = self.reg.decode_r8(r);
                 let v = self.readr8reg(&r);
                 self.alu_a(i, v);
-                if r == Register::Hlm { 3 } else { 2 }
+                if r == Register::Hlm { 2 } else { 1 }
             }
 
+            // RET condition
             "110cc000" => {
                 let c = decode_condition(c).check(self);
-                if c { self.reg.pc = self.popstack(); 4 } else { 2 }
+                if c { self.reg.pc = self.popstack(); 5 } else { 2 }
             }
-
+            
+            // LD (FF00 + u8), A
             "11100000" => {
                 let a = 0xFF00 | self.fetchb() as u16;
                 self.writeb(a, self.reg.a);
                 3
             }
 
+            // ADD SP, i8
             "11101000" => {
                 let b = self.fetchb() as i8 as i16 as u16;
                 let a = self.reg.sp;
@@ -243,8 +275,10 @@ impl Cpu {
                 4
             }
 
+            // LD A, (FF00+u8)
             "11110000" => { let a = self.fetchb() as u16 | 0xFF00; let v = self.mmu.rb(a); self.reg.a = v; 3 }
 
+            // LD HL, SP+i8
             "11111000" => {
                 let v = self.fetchb() as i8 as i16 as u16;
                 let sp = self.reg.sp;
@@ -258,6 +292,7 @@ impl Cpu {
                 3
             }
 
+            // POP r16
             "11rr0001" => {
                 let r = self.reg.decode_r16_g3(r);
                 let mut v = self.popstack();
@@ -266,6 +301,7 @@ impl Cpu {
                 3
             }
 
+            // RET, RETI, JP HL, LD SP, HL
             "11ii1001" => match i {
                 0 => { self.reg.pc = self.popstack(); 4 },
                 1 => { self.setei = 1; self.reg.pc = self.popstack(); 4 }
@@ -274,23 +310,30 @@ impl Cpu {
                 _ => unreachable!(),
             },
 
+            // JP (conditional)
             "110cc010" => match decode_condition(c).check(self) {
                 true => { self.reg.pc = self.fetchw(); 4 }
                 false => { self.reg.pc = self.reg.pc.wrapping_add(2); 3 }
             },
 
+            // LD (FF00+C), A
             "11100010" => { let a = self.reg.c as u16 | 0xFF00; let v = self.reg.a; self.writeb(a, v); 2 }
+            // LD (u16), A
             "11101010" => { let a = self.fetchw(); self.writeb(a, self.reg.a); 4 }
+            //LD A, (0xFF00+C)
             "11110010" => { let a = self.reg.c as u16 | 0xFF00; let v = self.mmu.rb(a); self.reg.a = v; 2 }
+            //LD A, (u16)
             "11111010" => { let a = self.fetchw(); let v = self.mmu.rb(a); self.reg.a = v; 4 }
 
+            // 0: JP u16, 1:
+            // (CB prefix), 6:
+            // DI, 7: EI. ALL
             "11iii011" => {
                 match i {
                     0 => { let x = self.fetchw(); self.reg.pc = x; 4 }
                     1 => {
                         let opcode = self.fetchb();
 
-                        let after_prefix =
                         #[bitmatch]
                         match opcode {
                             "00iiirrr" => {
@@ -324,19 +367,22 @@ impl Cpu {
                                 }
                             }
                             _ => unreachable!()
-                        };
-
-                        1 + after_prefix
+                        }
                     }
                     6 => { self.setdi = 1; 1 },
                     7 => { self.setei = 2; 1 },
                     _ => unreachable!(),
                 }
             },
+            // CALL condition
             "110cc100" => { let c = decode_condition(c); self.conditional_call(c) }
+            // PUSH r16
             "11rr0101" => { let r = self.reg.decode_r16_g3(r); let v = self.readreg(&r); self.pushstack(v); 4 }
+            // CALL
             "11001101" => { self.pushstack(self.reg.pc + 2); self.reg.pc = self.fetchw(); 6 }
-            "11iii110" => { let v = self.fetchb(); self.alu_a(i, v); 2}
+            // ALU A, u8
+            "11iii110" => { let v = self.fetchb(); self.alu_a(i, v); 2 }
+            // RST
             "11eee111" => {
                 self.pushstack(self.reg.pc);
                 self.reg.pc = (e << 3) as u16;

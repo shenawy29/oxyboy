@@ -19,7 +19,7 @@ impl Mmu {
             serial_data: [0, 0],
             ppu: Ppu::new(),
             joypad: Joypad::new(),
-            timer: Timer::default(),
+            timer: Timer::new(),
             inte: 0,
             intf: 0,
         }
@@ -31,7 +31,7 @@ impl Mmu {
             serial_data: [0, 0],
             ppu: Ppu::new(),
             joypad: Joypad::new(),
-            timer: Timer::default(),
+            timer: Timer::new(),
             inte: 0,
             intf: 0,
         }

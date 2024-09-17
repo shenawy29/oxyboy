@@ -58,4 +58,8 @@ impl Timer {
             }
         }
     }
+
+    pub(crate) fn new() -> Self {
+        Self::default()
+    }
 }
