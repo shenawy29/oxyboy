@@ -110,8 +110,8 @@ impl Cpu {
 
         #[bitmatch]
         match opcode {
-            "00000000" => 1,
-            "00001000" => { let v = self.fetchw(); self.writew(v, self.reg.sp);  5 }
+            "00000000" => 1, // 0x0
+            "00001000" => { let v = self.fetchw(); self.writew(v, self.reg.sp);  3 }
             "00010000" => 1,
             "00011000" => { self.jr(); 3 }
             "001cc000" => {
@@ -290,6 +290,7 @@ impl Cpu {
                     1 => {
                         let opcode = self.fetchb();
 
+                        let after_prefix =
                         #[bitmatch]
                         match opcode {
                             "00iiirrr" => {
@@ -323,7 +324,9 @@ impl Cpu {
                                 }
                             }
                             _ => unreachable!()
-                        }
+                        };
+
+                        1 + after_prefix
                     }
                     6 => { self.setdi = 1; 1 },
                     7 => { self.setei = 2; 1 },

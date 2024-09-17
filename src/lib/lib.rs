@@ -35,10 +35,14 @@ impl Emulator {
         receiver: Receiver<Press>,
         fnreceiver: Receiver<PathBuf>,
     ) {
-        let file = loop {
-            if let Ok(file) = fnreceiver.try_recv() {
-                break file;
-            };
+        let file = if std::env::args().len() == 2 {
+            PathBuf::from(std::env::args().nth(1).unwrap())
+        } else {
+            loop {
+                if let Ok(file) = fnreceiver.try_recv() {
+                    break file;
+                };
+            }
         };
 
         cpu.mmu = Mmu::from(file);

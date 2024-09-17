@@ -104,9 +104,10 @@ impl Ppu {
     }
 
     pub(crate) fn do_cycle(&mut self, ticks: u32) {
-        if !self.lcdc(Lcdc::LCD_ON) {
-            return;
-        }
+        // This check makes some games not work for some reason
+        // if !self.lcdc(Lcdc::LCD_ON) {
+        //     return;
+        // }
 
         let overflow: bool;
         (self.clock, overflow) = self.clock.overflowing_sub(ticks);
