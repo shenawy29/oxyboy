@@ -1,6 +1,6 @@
 # Oxyboy
 
-Oxyboy is a partially-implemented Gameboy emulator written in Rust, using WebGPU and Egui/Eframe for rendering and window handling. This is a work-in-progress project. While many games run, not all of them do, due to the lack of MBC1 emulation.
+Oxyboy is a partially-implemented Gameboy emulator written in Rust, using WebGPU and Egui/Eframe for rendering and window handling. This is a work-in-progress project. The only mapper emulated is MBC1, which allows most games to run.
 
 To find games, go to [emulatorgames.net](https://emulatorgames.net). [Here](https://www.emulatorgames.net/roms/gameboy-color/tetris/) is link for Tetris.
 
